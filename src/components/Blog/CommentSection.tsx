@@ -4,22 +4,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, ThumbsDown, Reply } from 'lucide-react';
+import { Heart, Reply } from 'lucide-react';
+import { Comment as MockDataComment } from '@/data/mockData';
 
 interface Comment {
   id: string;
-  user: {
-    name: string;
-    avatar?: string;
-  };
   content: string;
-  timestamp: string; // This will replace the 'date' property that was causing the error
+  author: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  publishedDate: string;
   likes: number;
   replies?: Comment[];
 }
 
 interface CommentSectionProps {
-  comments: Comment[];
+  comments: MockDataComment[];
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
@@ -50,6 +52,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
     }
   };
   
+  // Map MockDataComment to the internal Comment format for rendering
+  const mapComment = (comment: MockDataComment): Comment => ({
+    id: comment.id,
+    content: comment.content,
+    author: comment.author,
+    publishedDate: comment.publishedDate,
+    likes: comment.likes,
+    replies: comment.replies ? comment.replies.map(mapComment) : undefined
+  });
+  
+  const mappedComments = comments.map(mapComment);
+  
   return (
     <section className="mt-12">
       <h2 className="text-2xl font-playfair font-bold text-gray-900 dark:text-white mb-6">
@@ -69,21 +83,21 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
       </form>
       
       <div className="space-y-6">
-        {comments.map((comment) => (
+        {mappedComments.map((comment) => (
           <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-6">
             <div className="flex items-start space-x-4">
               <Avatar>
-                <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
-                <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
+                <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
                 <div className="flex justify-between items-center mb-2">
                   <h4 className="font-medium text-gray-900 dark:text-white">
-                    {comment.user.name}
+                    {comment.author.name}
                   </h4>
                   <span className="text-sm text-gray-500 dark:text-gray-400">
-                    {new Date(comment.timestamp).toLocaleDateString('en-US', {
+                    {new Date(comment.publishedDate).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric'
@@ -101,8 +115,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
                     {comment.likes}
                   </button>
                   
-                  {/* Removed the dislikes button that was causing the error */}
-                  
                   <button 
                     onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
                     className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors"
@@ -115,7 +127,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
                 {replyingTo === comment.id && (
                   <div className="mt-4">
                     <Textarea 
-                      placeholder={`Reply to ${comment.user.name}...`}
+                      placeholder={`Reply to ${comment.author.name}...`}
                       value={replyContent}
                       onChange={(e) => setReplyContent(e.target.value)}
                       className="mb-2"
@@ -144,17 +156,17 @@ const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
                     {comment.replies.map((reply) => (
                       <div key={reply.id} className="flex items-start space-x-4">
                         <Avatar>
-                          <AvatarImage src={reply.user.avatar} alt={reply.user.name} />
-                          <AvatarFallback>{reply.user.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={reply.author.avatar} alt={reply.author.name} />
+                          <AvatarFallback>{reply.author.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         
                         <div>
                           <div className="flex items-center mb-1">
                             <h5 className="font-medium text-gray-900 dark:text-white mr-2">
-                              {reply.user.name}
+                              {reply.author.name}
                             </h5>
                             <span className="text-xs text-gray-500 dark:text-gray-400">
-                              {new Date(reply.timestamp).toLocaleDateString('en-US', {
+                              {new Date(reply.publishedDate).toLocaleDateString('en-US', {
                                 year: 'numeric',
                                 month: 'short',
                                 day: 'numeric'
