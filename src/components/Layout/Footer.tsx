@@ -1,128 +1,65 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Twitter, Linkedin, Instagram, Mail, GitHub, ArrowRight } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { categories } from '@/data/mockData';
+import { Heart, Twitter, Linkedin, Github } from 'lucide-react';
 
 const Footer: React.FC = () => {
+  const currentYear = new Date().getFullYear();
+  
   return (
-    <footer className="bg-gray-50 dark:bg-gray-900 pt-16 pb-8 border-t border-gray-200 dark:border-gray-800 mt-24">
+    <footer className="border-t border-gray-200 dark:border-gray-800 pt-12 pb-6">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-          {/* Brand Column */}
-          <div className="space-y-6">
-            <Link to="/" className="text-2xl font-playfair font-bold text-blog-purple">
-              Insight<span className="text-blog-blue">Blog</span>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          <div className="md:col-span-2">
+            <Link to="/" className="text-2xl font-playfair font-bold text-gray-900 dark:text-white mb-4 block">
+              Prose<span className="text-blog-purple">Pulse</span>
             </Link>
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              Delivering insightful articles and guides on technology, design, and development to help you stay at the cutting edge.
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              A next-generation blog platform with stunning visuals, 
+              seamless animations, and an immersive reading experience.
             </p>
             <div className="flex space-x-4">
-              <a href="https://twitter.com" className="text-gray-500 hover:text-blog-purple dark:text-gray-400 dark:hover:text-blog-light-purple transition-colors">
-                <Twitter size={20} />
-              </a>
-              <a href="https://linkedin.com" className="text-gray-500 hover:text-blog-purple dark:text-gray-400 dark:hover:text-blog-light-purple transition-colors">
-                <Linkedin size={20} />
-              </a>
-              <a href="https://instagram.com" className="text-gray-500 hover:text-blog-purple dark:text-gray-400 dark:hover:text-blog-light-purple transition-colors">
-                <Instagram size={20} />
-              </a>
-              <a href="https://github.com" className="text-gray-500 hover:text-blog-purple dark:text-gray-400 dark:hover:text-blog-light-purple transition-colors">
-                <GitHub size={20} />
-              </a>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <Twitter size={18} />
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <Linkedin size={18} />
+              </Button>
+              <Button variant="outline" size="icon" className="rounded-full">
+                <Github size={18} />
+              </Button>
             </div>
           </div>
-
-          {/* Quick Links */}
+          
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Quick Links</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link to="/" className="text-gray-600 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple text-sm transition-colors">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-gray-600 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple text-sm transition-colors">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link to="/contact" className="text-gray-600 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple text-sm transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link to="/privacy-policy" className="text-gray-600 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple text-sm transition-colors">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms-of-service" className="text-gray-600 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple text-sm transition-colors">
-                  Terms of Service
-                </Link>
-              </li>
+            <h3 className="font-medium text-gray-900 dark:text-white mb-4">Explore</h3>
+            <ul className="space-y-2">
+              <li><Link to="/" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Home</Link></li>
+              <li><Link to="/trending" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Trending</Link></li>
+              <li><Link to="/categories" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Categories</Link></li>
+              <li><Link to="/authors" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Authors</Link></li>
             </ul>
           </div>
-
-          {/* Categories */}
+          
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Categories</h3>
-            <ul className="space-y-3">
-              {categories.slice(0, 6).map(category => (
-                <li key={category}>
-                  <Link 
-                    to={`/category/${category.toLowerCase().replace(/\s+/g, '-')}`} 
-                    className="text-gray-600 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple text-sm transition-colors"
-                  >
-                    {category}
-                  </Link>
-                </li>
-              ))}
+            <h3 className="font-medium text-gray-900 dark:text-white mb-4">Company</h3>
+            <ul className="space-y-2">
+              <li><Link to="/about" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">About</Link></li>
+              <li><Link to="/contact" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Contact</Link></li>
+              <li><Link to="/privacy" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Privacy Policy</Link></li>
+              <li><Link to="/terms" className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">Terms of Service</Link></li>
             </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-6">Subscribe to our Newsletter</h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-              Stay up to date with our latest articles and news.
-            </p>
-            <div className="flex flex-col space-y-3">
-              <div className="flex">
-                <Input 
-                  type="email" 
-                  placeholder="Your email address" 
-                  className="rounded-r-none focus:ring-blog-purple" 
-                />
-                <Button 
-                  className="rounded-l-none bg-blog-purple hover:bg-blog-light-purple px-3"
-                  aria-label="Subscribe"
-                >
-                  <ArrowRight size={18} />
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-500">
-                By subscribing, you agree to our Privacy Policy and consent to receive updates.
-              </p>
-            </div>
           </div>
         </div>
-
-        <div className="border-t border-gray-200 dark:border-gray-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <p className="text-gray-600 dark:text-gray-400 text-sm">
-              © {new Date().getFullYear()} InsightBlog. All rights reserved.
-            </p>
-            <div className="mt-4 md:mt-0">
-              <a href="mailto:contact@insightblog.com" className="flex items-center text-gray-600 dark:text-gray-400 text-sm hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">
-                <Mail size={16} className="mr-2" />
-                contact@insightblog.com
-              </a>
-            </div>
-          </div>
+        
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-6 flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 sm:mb-0">
+            &copy; {currentYear} ProsePulse. All rights reserved.
+          </p>
+          <p className="text-gray-600 dark:text-gray-400 text-sm flex items-center">
+            Made with <Heart size={14} className="mx-1 text-blog-purple" /> by ProsePulse Team
+          </p>
         </div>
       </div>
     </footer>

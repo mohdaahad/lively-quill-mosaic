@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '@/components/Layout/Layout';
 import HeroSection from '@/components/Home/HeroSection';
+import SearchBar from '@/components/Home/SearchBar';
 import FeaturedPosts from '@/components/Blog/FeaturedPosts';
 import TrendingPosts from '@/components/Blog/TrendingPosts';
 import BlogGrid from '@/components/Blog/BlogGrid';
@@ -21,6 +22,14 @@ const Index = () => {
   return (
     <Layout>
       <HeroSection featuredPost={featuredPost} />
+      
+      {/* Search Section */}
+      <section className="py-8 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <SearchBar />
+        </div>
+      </section>
+      
       <FeaturedPosts posts={blogPosts} />
       <TrendingPosts posts={blogPosts} />
       

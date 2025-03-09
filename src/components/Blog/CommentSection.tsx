@@ -1,291 +1,166 @@
 
 import React, { useState } from 'react';
-import { Comment } from '@/data/mockData';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/input';
-import { ThumbsUp, MessageCircle, CornerDownRight } from 'lucide-react';
-import { useToast } from "@/hooks/use-toast";
+import { Avatar } from '@/components/ui/avatar';
+import { AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
+import { MessageCircle, ThumbsUp, ThumbsDown, Reply } from 'lucide-react';
+import { Comment, Author } from '@/data/mockData';
 
 interface CommentSectionProps {
   comments: Comment[];
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ comments: initialComments }) => {
-  const [comments, setComments] = useState<Comment[]>(initialComments);
-  const [newComment, setNewComment] = useState('');
-  const [replyToId, setReplyToId] = useState<string | null>(null);
-  const [replyText, setReplyText] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
+  const [commentText, setCommentText] = useState('');
+  const [expanded, setExpanded] = useState<string[]>([]);
   
-  const handleLike = (commentId: string) => {
-    setComments(prev => 
-      prev.map(comment => {
-        if (comment.id === commentId) {
-          return { ...comment, likes: comment.likes + 1 };
-        }
-        
-        // Check if it's a reply in any comment
-        if (comment.replies) {
-          return {
-            ...comment,
-            replies: comment.replies.map(reply => 
-              reply.id === commentId ? { ...reply, likes: reply.likes + 1 } : reply
-            )
-          };
-        }
-        
-        return comment;
-      })
+  const toggleReply = (commentId: string) => {
+    setExpanded(prev => 
+      prev.includes(commentId) 
+        ? prev.filter(id => id !== commentId)
+        : [...prev, commentId]
     );
-    
-    toast({
-      description: "You liked a comment",
-      duration: 1500,
-    });
   };
   
-  const handleToggleReply = (commentId: string) => {
-    setReplyToId(replyToId === commentId ? null : commentId);
-    setReplyText('');
-  };
-  
-  const handleSubmitReply = (commentId: string) => {
-    if (!replyText.trim()) {
-      toast({
-        title: "Empty reply",
-        description: "Please enter some text for your reply",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const newReply: Comment = {
-        id: `reply-${Date.now()}`,
-        content: replyText,
-        author: {
-          id: 'current-user',
-          name: 'You',
-          avatar: 'https://i.pravatar.cc/150?img=12'
-        },
-        publishedDate: new Date().toISOString(),
-        likes: 0
-      };
-      
-      setComments(prev => 
-        prev.map(comment => {
-          if (comment.id === commentId) {
-            return {
-              ...comment,
-              replies: [...(comment.replies || []), newReply]
-            };
-          }
-          return comment;
-        })
-      );
-      
-      setReplyText('');
-      setReplyToId(null);
-      setIsSubmitting(false);
-      
-      toast({
-        title: "Reply added",
-        description: "Your reply has been added successfully",
-      });
-    }, 1000);
-  };
-  
-  const handleSubmitComment = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Here would be the logic to post the comment
+    setCommentText('');
+  };
+  
+  const CommentItem = ({ comment, level = 0 }: { comment: Comment, level?: number }) => {
+    const [replyText, setReplyText] = useState('');
+    const isExpanded = expanded.includes(comment.id);
     
-    if (!newComment.trim()) {
-      toast({
-        title: "Empty comment",
-        description: "Please enter some text for your comment",
-        variant: "destructive",
-      });
-      return;
-    }
+    const handleReplySubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      // Here would be the logic to post the reply
+      setReplyText('');
+      toggleReply(comment.id);
+    };
     
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const comment: Comment = {
-        id: `comment-${Date.now()}`,
-        content: newComment,
-        author: {
-          id: 'current-user',
-          name: 'You',
-          avatar: 'https://i.pravatar.cc/150?img=12'
-        },
-        publishedDate: new Date().toISOString(),
-        likes: 0,
-        replies: []
-      };
-      
-      setComments(prev => [comment, ...prev]);
-      setNewComment('');
-      setIsSubmitting(false);
-      
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully",
-      });
-    }, 1000);
+    return (
+      <div className={`animate-fade-in mb-6 ${level > 0 ? 'ml-8 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : ''}`}>
+        <div className="flex space-x-4">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
+            <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
+          </Avatar>
+          
+          <div className="flex-1">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  {comment.author.name}
+                </h4>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {new Date(comment.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+            
+            <p className="text-gray-700 dark:text-gray-300 mb-3">
+              {comment.content}
+            </p>
+            
+            <div className="flex space-x-4 mb-3">
+              <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm">
+                <ThumbsUp size={14} className="mr-1" />
+                {comment.likes}
+              </button>
+              <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm">
+                <ThumbsDown size={14} className="mr-1" />
+                {comment.dislikes}
+              </button>
+              <button 
+                onClick={() => toggleReply(comment.id)}
+                className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm"
+              >
+                <Reply size={14} className="mr-1" />
+                Reply
+              </button>
+            </div>
+            
+            {isExpanded && (
+              <form onSubmit={handleReplySubmit} className="mb-4 animate-fade-in">
+                <Textarea
+                  placeholder="Write a reply..."
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  className="w-full mb-2 resize-none"
+                  rows={3}
+                />
+                <div className="flex justify-end space-x-2">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => toggleReply(comment.id)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    disabled={!replyText.trim()}
+                  >
+                    Reply
+                  </Button>
+                </div>
+              </form>
+            )}
+            
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="mt-4">
+                {comment.replies.map(reply => (
+                  <CommentItem 
+                    key={reply.id} 
+                    comment={reply} 
+                    level={level + 1} 
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
   
   return (
-    <section className="my-10 animate-fade-in">
-      <h3 className="text-2xl font-playfair font-bold text-gray-900 dark:text-white mb-6">
+    <section className="my-12">
+      <h2 className="text-2xl font-playfair font-bold text-gray-900 dark:text-white mb-6 flex items-center">
+        <MessageCircle className="mr-2" />
         Comments ({comments.length})
-      </h3>
+      </h2>
       
-      {/* New comment form */}
-      <form onSubmit={handleSubmitComment} className="mb-10">
+      <form onSubmit={handleSubmit} className="mb-8">
         <Textarea
-          placeholder="Add a comment..."
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-blog-purple focus:border-blog-purple dark:bg-gray-800"
-          rows={3}
-          disabled={isSubmitting}
+          placeholder="Share your thoughts..."
+          value={commentText}
+          onChange={(e) => setCommentText(e.target.value)}
+          className="w-full mb-2 resize-none"
+          rows={4}
         />
-        <div className="flex justify-end mt-2">
+        <div className="flex justify-end">
           <Button 
             type="submit" 
-            className="button-primary"
-            disabled={isSubmitting}
+            disabled={!commentText.trim()}
           >
-            {isSubmitting ? 'Posting...' : 'Post Comment'}
+            Post Comment
           </Button>
         </div>
       </form>
       
-      {/* Comments list */}
-      <div className="space-y-8">
-        {comments.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400 text-center py-4">
-            No comments yet. Be the first to comment!
-          </p>
-        ) : (
-          comments.map(comment => (
-            <div key={comment.id} className="animate-fade-in">
-              <div className="flex space-x-4">
-                <img 
-                  src={comment.author.avatar} 
-                  alt={comment.author.name} 
-                  className="w-10 h-10 rounded-full"
-                />
-                <div className="flex-1">
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                    <div className="flex justify-between mb-2">
-                      <h4 className="font-medium text-gray-900 dark:text-white">
-                        {comment.author.name}
-                      </h4>
-                      <span className="text-gray-500 dark:text-gray-400 text-sm">
-                        {new Date(comment.publishedDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <p className="text-gray-700 dark:text-gray-300">
-                      {comment.content}
-                    </p>
-                  </div>
-                  
-                  <div className="flex items-center mt-2 space-x-4">
-                    <button 
-                      onClick={() => handleLike(comment.id)}
-                      className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm"
-                    >
-                      <ThumbsUp size={14} className="mr-1" />
-                      {comment.likes}
-                    </button>
-                    <button 
-                      onClick={() => handleToggleReply(comment.id)}
-                      className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm"
-                    >
-                      <MessageCircle size={14} className="mr-1" />
-                      Reply
-                    </button>
-                  </div>
-                  
-                  {/* Reply form */}
-                  {replyToId === comment.id && (
-                    <div className="mt-4 pl-4 border-l-2 border-gray-200 dark:border-gray-700">
-                      <Textarea
-                        placeholder="Write a reply..."
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-blog-purple focus:border-blog-purple dark:bg-gray-800"
-                        rows={2}
-                        disabled={isSubmitting}
-                      />
-                      <div className="flex justify-end mt-2 space-x-2">
-                        <Button 
-                          variant="outline" 
-                          onClick={() => setReplyToId(null)}
-                          disabled={isSubmitting}
-                        >
-                          Cancel
-                        </Button>
-                        <Button 
-                          onClick={() => handleSubmitReply(comment.id)}
-                          className="button-primary"
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? 'Posting...' : 'Post Reply'}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Replies */}
-                  {comment.replies && comment.replies.length > 0 && (
-                    <div className="mt-4 space-y-4">
-                      {comment.replies.map(reply => (
-                        <div key={reply.id} className="flex space-x-4 pl-6 border-l-2 border-gray-200 dark:border-gray-700 animate-fade-in">
-                          <div className="flex-shrink-0">
-                            <img 
-                              src={reply.author.avatar} 
-                              alt={reply.author.name} 
-                              className="w-8 h-8 rounded-full"
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
-                              <div className="flex justify-between mb-1">
-                                <h5 className="font-medium text-gray-900 dark:text-white text-sm">
-                                  {reply.author.name}
-                                </h5>
-                                <span className="text-gray-500 dark:text-gray-400 text-xs">
-                                  {new Date(reply.publishedDate).toLocaleDateString()}
-                                </span>
-                              </div>
-                              <p className="text-gray-700 dark:text-gray-300 text-sm">
-                                {reply.content}
-                              </p>
-                            </div>
-                            <button 
-                              onClick={() => handleLike(reply.id)}
-                              className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-xs mt-1"
-                            >
-                              <ThumbsUp size={12} className="mr-1" />
-                              {reply.likes}
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+      <div className="space-y-6">
+        {comments.map(comment => (
+          <CommentItem key={comment.id} comment={comment} />
+        ))}
       </div>
     </section>
   );
