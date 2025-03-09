@@ -68,8 +68,25 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
                       {category}
                     </Link>
                   ))}
+                  <Link
+                    to="/categories"
+                    className="block px-4 py-2 text-sm text-blog-purple dark:text-blog-light-purple font-medium border-t border-gray-100 dark:border-gray-700"
+                    role="menuitem"
+                  >
+                    View All Categories
+                  </Link>
                 </div>
               </div>
+            </li>
+            <li>
+              <Link to="/featured" className="nav-link">
+                Featured
+              </Link>
+            </li>
+            <li>
+              <Link to="/authors" className="nav-link">
+                Authors
+              </Link>
             </li>
             <li>
               <Link to="/about" className="nav-link">
@@ -84,12 +101,13 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
           </ul>
 
           <div className="flex items-center space-x-4">
-            <button
+            <Link
+              to="/search"
               className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors"
               aria-label="Search"
             >
               <Search size={20} />
-            </button>
+            </Link>
             <button
               onClick={toggleTheme}
               className="text-gray-600 dark:text-gray-300 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors"
@@ -97,12 +115,21 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
             >
               {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <Button className="button-primary">Subscribe</Button>
+            <Button asChild className="button-primary">
+              <Link to="/subscribe">Subscribe</Link>
+            </Button>
           </div>
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden flex items-center">
+          <Link
+            to="/search"
+            className="text-gray-600 dark:text-gray-300 mr-4"
+            aria-label="Search"
+          >
+            <Search size={20} />
+          </Link>
           <button
             onClick={toggleTheme}
             className="text-gray-600 dark:text-gray-300 mr-4"
@@ -150,7 +177,34 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
                       </Link>
                     </li>
                   ))}
+                  <li>
+                    <Link
+                      to="/categories"
+                      className="block py-1 text-sm text-blog-purple dark:text-blog-light-purple font-medium"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      View All Categories
+                    </Link>
+                  </li>
                 </ul>
+              </li>
+              <li>
+                <Link
+                  to="/featured"
+                  className="block py-2 text-gray-800 dark:text-gray-200 hover:text-blog-purple dark:hover:text-blog-light-purple"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Featured
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/authors"
+                  className="block py-2 text-gray-800 dark:text-gray-200 hover:text-blog-purple dark:hover:text-blog-light-purple"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Authors
+                </Link>
               </li>
               <li>
                 <Link
@@ -171,13 +225,13 @@ const Navbar: React.FC<NavbarProps> = ({ isDark, toggleTheme }) => {
                 </Link>
               </li>
               <li>
-                <div className="flex space-x-4 items-center mt-4">
-                  <Search size={20} className="text-gray-600 dark:text-gray-300" />
-                  <span className="text-gray-600 dark:text-gray-300">Search</span>
-                </div>
-              </li>
-              <li>
-                <Button className="w-full mt-4 button-primary">Subscribe</Button>
+                <Button 
+                  asChild 
+                  className="w-full mt-4 button-primary"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Link to="/subscribe">Subscribe</Link>
+                </Button>
               </li>
             </ul>
           </div>

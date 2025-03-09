@@ -1,165 +1,178 @@
 
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Avatar } from '@/components/ui/avatar';
-import { AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
-import { MessageCircle, ThumbsUp, ThumbsDown, Reply } from 'lucide-react';
-import { Comment, Author } from '@/data/mockData';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
+import { Heart, ThumbsDown, Reply } from 'lucide-react';
+
+interface Comment {
+  id: string;
+  user: {
+    name: string;
+    avatar?: string;
+  };
+  content: string;
+  timestamp: string; // This will replace the 'date' property that was causing the error
+  likes: number;
+  replies?: Comment[];
+}
 
 interface CommentSectionProps {
   comments: Comment[];
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({ comments }) => {
-  const [commentText, setCommentText] = useState('');
-  const [expanded, setExpanded] = useState<string[]>([]);
+  const [newComment, setNewComment] = useState('');
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
+  const { toast } = useToast();
   
-  const toggleReply = (commentId: string) => {
-    setExpanded(prev => 
-      prev.includes(commentId) 
-        ? prev.filter(id => id !== commentId)
-        : [...prev, commentId]
-    );
-  };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitComment = (e: React.FormEvent) => {
     e.preventDefault();
-    // Here would be the logic to post the comment
-    setCommentText('');
+    if (newComment.trim()) {
+      toast({
+        description: "Comment posted successfully!",
+        duration: 1500,
+      });
+      setNewComment('');
+    }
   };
   
-  const CommentItem = ({ comment, level = 0 }: { comment: Comment, level?: number }) => {
-    const [replyText, setReplyText] = useState('');
-    const isExpanded = expanded.includes(comment.id);
-    
-    const handleReplySubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      // Here would be the logic to post the reply
-      setReplyText('');
-      toggleReply(comment.id);
-    };
-    
-    return (
-      <div className={`animate-fade-in mb-6 ${level > 0 ? 'ml-8 border-l-2 border-gray-200 dark:border-gray-700 pl-4' : ''}`}>
-        <div className="flex space-x-4">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={comment.author.avatar} alt={comment.author.name} />
-            <AvatarFallback>{comment.author.name.charAt(0)}</AvatarFallback>
-          </Avatar>
-          
-          <div className="flex-1">
-            <div className="flex items-center justify-between mb-2">
-              <div>
-                <h4 className="font-medium text-gray-900 dark:text-white">
-                  {comment.author.name}
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date(comment.date).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                </p>
-              </div>
-            </div>
-            
-            <p className="text-gray-700 dark:text-gray-300 mb-3">
-              {comment.content}
-            </p>
-            
-            <div className="flex space-x-4 mb-3">
-              <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm">
-                <ThumbsUp size={14} className="mr-1" />
-                {comment.likes}
-              </button>
-              <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm">
-                <ThumbsDown size={14} className="mr-1" />
-                {comment.dislikes}
-              </button>
-              <button 
-                onClick={() => toggleReply(comment.id)}
-                className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors text-sm"
-              >
-                <Reply size={14} className="mr-1" />
-                Reply
-              </button>
-            </div>
-            
-            {isExpanded && (
-              <form onSubmit={handleReplySubmit} className="mb-4 animate-fade-in">
-                <Textarea
-                  placeholder="Write a reply..."
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  className="w-full mb-2 resize-none"
-                  rows={3}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => toggleReply(comment.id)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    size="sm"
-                    disabled={!replyText.trim()}
-                  >
-                    Reply
-                  </Button>
-                </div>
-              </form>
-            )}
-            
-            {comment.replies && comment.replies.length > 0 && (
-              <div className="mt-4">
-                {comment.replies.map(reply => (
-                  <CommentItem 
-                    key={reply.id} 
-                    comment={reply} 
-                    level={level + 1} 
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    );
+  const handleSubmitReply = (commentId: string) => {
+    if (replyContent.trim()) {
+      toast({
+        description: "Reply posted successfully!",
+        duration: 1500,
+      });
+      setReplyContent('');
+      setReplyingTo(null);
+    }
   };
   
   return (
-    <section className="my-12">
-      <h2 className="text-2xl font-playfair font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-        <MessageCircle className="mr-2" />
+    <section className="mt-12">
+      <h2 className="text-2xl font-playfair font-bold text-gray-900 dark:text-white mb-6">
         Comments ({comments.length})
       </h2>
       
-      <form onSubmit={handleSubmit} className="mb-8">
-        <Textarea
-          placeholder="Share your thoughts..."
-          value={commentText}
-          onChange={(e) => setCommentText(e.target.value)}
-          className="w-full mb-2 resize-none"
-          rows={4}
+      <form onSubmit={handleSubmitComment} className="mb-8">
+        <Textarea 
+          placeholder="Write a comment..." 
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          className="mb-4"
         />
-        <div className="flex justify-end">
-          <Button 
-            type="submit" 
-            disabled={!commentText.trim()}
-          >
-            Post Comment
-          </Button>
-        </div>
+        <Button type="submit" disabled={!newComment.trim()}>
+          Post Comment
+        </Button>
       </form>
       
       <div className="space-y-6">
-        {comments.map(comment => (
-          <CommentItem key={comment.id} comment={comment} />
+        {comments.map((comment) => (
+          <div key={comment.id} className="border-b border-gray-200 dark:border-gray-700 pb-6">
+            <div className="flex items-start space-x-4">
+              <Avatar>
+                <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
+                <AvatarFallback>{comment.user.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              
+              <div className="flex-1">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="font-medium text-gray-900 dark:text-white">
+                    {comment.user.name}
+                  </h4>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    {new Date(comment.timestamp).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </span>
+                </div>
+                
+                <p className="text-gray-600 dark:text-gray-300 mb-3">
+                  {comment.content}
+                </p>
+                
+                <div className="flex items-center space-x-4">
+                  <button className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors">
+                    <Heart size={16} className="mr-1" />
+                    {comment.likes}
+                  </button>
+                  
+                  {/* Removed the dislikes button that was causing the error */}
+                  
+                  <button 
+                    onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                    className="flex items-center text-gray-500 dark:text-gray-400 hover:text-blog-purple dark:hover:text-blog-light-purple transition-colors"
+                  >
+                    <Reply size={16} className="mr-1" />
+                    Reply
+                  </button>
+                </div>
+                
+                {replyingTo === comment.id && (
+                  <div className="mt-4">
+                    <Textarea 
+                      placeholder={`Reply to ${comment.user.name}...`}
+                      value={replyContent}
+                      onChange={(e) => setReplyContent(e.target.value)}
+                      className="mb-2"
+                    />
+                    <div className="flex space-x-2">
+                      <Button 
+                        size="sm" 
+                        onClick={() => handleSubmitReply(comment.id)}
+                        disabled={!replyContent.trim()}
+                      >
+                        Post Reply
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        onClick={() => setReplyingTo(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                
+                {comment.replies && comment.replies.length > 0 && (
+                  <div className="mt-4 ml-6 space-y-4">
+                    {comment.replies.map((reply) => (
+                      <div key={reply.id} className="flex items-start space-x-4">
+                        <Avatar>
+                          <AvatarImage src={reply.user.avatar} alt={reply.user.name} />
+                          <AvatarFallback>{reply.user.name.charAt(0)}</AvatarFallback>
+                        </Avatar>
+                        
+                        <div>
+                          <div className="flex items-center mb-1">
+                            <h5 className="font-medium text-gray-900 dark:text-white mr-2">
+                              {reply.user.name}
+                            </h5>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {new Date(reply.timestamp).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </span>
+                          </div>
+                          
+                          <p className="text-gray-600 dark:text-gray-300">
+                            {reply.content}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </section>
